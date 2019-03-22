@@ -12,7 +12,5 @@
   "background" : {
     "scripts" : [ "background.js" ]
   },
-  "browser_action": {
-  },
-  "permissions": [ "tabs", "activeTab", "https://i94.cbp.dhs.gov/" ]
+  "permissions": [ "activeTab", "https://i94.cbp.dhs.gov/" ]
 }
