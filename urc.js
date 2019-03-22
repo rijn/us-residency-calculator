@@ -4,7 +4,7 @@ var TravelType = {
 };
 
 function readAndFormatTravelHistoryTable () {
-  const travelHistories = $('.history-results tbody').children().map(
+  const travelHistories = $('.history-results').first().find('tbody').children().map(
     function () {
       return Object.assign({}, ...$(this).children('td').map(function () {
         return { [this.className]: $(this).text() };
@@ -117,10 +117,20 @@ function aggregateTravelPairsByYear (travelPairs) {
     sum[year] += travelPair.interval;
     return sum;
   }, {});
-  console.log(sum);
+  return Object.entries(sum).map(([ year, sum ]) => ({ year, sum }));
 }
 
-function readTravelHistoryTableAndCalculateResidencyInterval () {
+function renderAndInsertDurationsByYear (durationsByYear) {
+  $('.duration-by-year').remove();
+  const dom = $('<table class="table table-comfortable history-results duration-by-year"><thead><tr><th></th><th scope="col"><strong>Year</strong></th><th scope="col"><strong>Duration</strong></th></tr></thead><tbody></tbody></table>');
+  durationsByYear.forEach((durationByYear, index) => {
+    const tr = $(`<tr><th>${index + 1}</th><td><strong>${durationByYear.year}</strong></td><td><strong>${durationByYear.sum}</strong></td></tr>`);
+    tr.appendTo($(dom).find('tbody'));
+  });
+  dom.insertAfter($('.history-results').first());
+}
+
+function readTravelHistoryTableAndRenderResidencyDuration () {
   let travelHistories = readAndFormatTravelHistoryTable();
   if (!travelHistories.length) return;
 
@@ -128,11 +138,12 @@ function readTravelHistoryTableAndCalculateResidencyInterval () {
 
   const travelPairs = generateTravelPairsFromTravelHistories(travelHistories);
   const separatedTravelPairs = separateTravelPairs(travelPairs);
-  const intervalByYear = aggregateTravelPairsByYear(separatedTravelPairs);
+  const durationsByYear = aggregateTravelPairsByYear(separatedTravelPairs);
+  renderAndInsertDurationsByYear(durationsByYear);
 }
 
 window.addEventListener('hashchange', function (e) {
-  readTravelHistoryTableAndCalculateResidencyInterval();
+  readTravelHistoryTableAndRenderResidencyDuration();
 });
 
-readTravelHistoryTableAndCalculateResidencyInterval();
+readTravelHistoryTableAndRenderResidencyDuration();
